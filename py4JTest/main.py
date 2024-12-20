@@ -4,12 +4,10 @@ import py4JEnvironment
 
 
 class Py4JTest(object):
-
     def test(self) -> str:
-        env = py4Jenvironment.TestPy4JEnv(100)
+        env = py4JEnvironment.TestPy4JEnv(200)
         model = DQN("MlpPolicy", env, verbose=1)
         model.learn(total_timesteps=1000, log_interval=4)
-
         return "test complete"
 
     class Java:
