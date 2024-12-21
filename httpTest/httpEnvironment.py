@@ -1,29 +1,42 @@
+import asyncio
+import os
+import signal
+import sys
+
 import numpy as np
 import gymnasium as gym
 import requests
+from pydantic import BaseModel, Field
 from stable_baselines3 import DQN
 from fastapi import BackgroundTasks, FastAPI
 
 # start with: uvicorn httpEnvironment:app --host 0.0.0.0 --port 8095
+# or from root directory: uvicorn httpTest.httpEnvironment:app --host 0.0.0.0 --port 8095
 
 JAVA_PORT = 8094
-OBSERVATION_VECTOR_SIZE = 200
+PORT = 8095
 
-class HttpTest():
+
+class HttpTest:
+    def __init__(self, observation_vector_size: int):
+        self.observation_vector_size = observation_vector_size
+
     def test(self):
-        env = TestHttpEnv(OBSERVATION_VECTOR_SIZE)
+        env = TestHttpEnv(self.observation_vector_size)
+
         model = DQN("MlpPolicy", env, verbose=1)
         model.learn(total_timesteps=1000, log_interval=4)
-        requests.post(f"http://127.0.0.1:{JAVA_PORT}/testComplete")
+        requests.post(f"http://127.0.0.1:{JAVA_PORT}/testComplete", "Test complete.")
         print("test complete")
-        exit()
+        exit_app()
+
 
 class TestHttpEnv(gym.Env):
 
     def __init__(self, observation_vector_size: int):
         self.observation_vector_size = observation_vector_size
 
-        self.observation_space = gym.spaces.Box(low=-100_000, high=100_000, dtype=np.float32, shape=(observation_vector_size,))
+        self.observation_space = gym.spaces.Box(low=-100_000, high=100_000, dtype=np.float32, shape=(self.observation_vector_size,))
         self.action_space = gym.spaces.Discrete(4)
 
     def reset(self, *, seed: int | None = None, options = None,):
@@ -47,10 +60,23 @@ class TestHttpEnv(gym.Env):
         info = response_body["info"]
         return observation_vector, reward, terminated, truncated, info
 
+
 app = FastAPI()
 
+
+class ObservationVectorSize(BaseModel):
+    observationVectorSize: int = Field(gt=0)
+
 @app.post("/start")
-async def start(background_tasks: BackgroundTasks):
-    test = HttpTest()
+async def start(observation_vector_size_class: ObservationVectorSize, background_tasks: BackgroundTasks):
+    test = HttpTest(observation_vector_size_class.observationVectorSize)
     background_tasks.add_task(test.test)
     return "Test started."
+
+
+def exit_app():
+    os.kill(os.getpid(), signal.SIGINT)
+
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run(app, host='0.0.0.0', port=PORT)
