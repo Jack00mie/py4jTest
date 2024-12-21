@@ -11,7 +11,7 @@ class Py4JTest(object):
         return "test complete"
 
     class Java:
-        implements = ["py4j.example.Py4JTest"]
+        implements = ["environment.application.py4JApplication.Py4JTest"]
 
 # Make sure that the python code is started first.
 # Then execute: java -cp py4j.jar py4j.examples.SingleThreadClientApplication
