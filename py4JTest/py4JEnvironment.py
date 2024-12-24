@@ -1,6 +1,7 @@
 import numpy as np
 import gymnasium as gym
-from py4j.java_gateway import JavaGateway, GatewayParameters
+import py4j.java_gateway
+from py4j.java_gateway import JavaGateway
 
 
 class TestPy4JEnv(gym.Env):
@@ -26,4 +27,7 @@ class TestPy4JEnv(gym.Env):
         transition = self.java_environment.step(int(action))
 
         return np.array(transition.getObservationVector()), transition.getReward(), transition.getTerminated(), transition.getTruncated(), dict(transition.getInfo())
+
+    def close(self):
+        py4j.java_gateway.quiet_shutdown(self.java_environment)
 

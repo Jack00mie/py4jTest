@@ -1,7 +1,5 @@
-import asyncio
 import os
 import signal
-import sys
 
 import numpy as np
 import gymnasium as gym
@@ -22,12 +20,12 @@ class HttpTest:
         self.observation_vector_size = observation_vector_size
 
     def test(self):
+        print("Http test round started.")
         env = TestHttpEnv(self.observation_vector_size)
-
         model = DQN("MlpPolicy", env, verbose=1)
         model.learn(total_timesteps=1000, log_interval=4)
-        requests.post(f"http://127.0.0.1:{JAVA_PORT}/testComplete", "Test complete.")
-        print("test complete")
+        requests.post(f"http://127.0.0.1:{JAVA_PORT}/testComplete", "Http test round complete.")
+        print("Http test round complete.")
         exit_app()
 
 
@@ -71,12 +69,14 @@ class ObservationVectorSize(BaseModel):
 async def start(observation_vector_size_class: ObservationVectorSize, background_tasks: BackgroundTasks):
     test = HttpTest(observation_vector_size_class.observationVectorSize)
     background_tasks.add_task(test.test)
-    return "Test started."
+    return "Http test round started."
 
 
 def exit_app():
+    print("Killing process.")
     os.kill(os.getpid(), signal.SIGINT)
 
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host='0.0.0.0', port=PORT)
+    print("Http Server started.")
