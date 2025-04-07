@@ -1,5 +1,6 @@
 import os
 import signal
+import time
 
 import numpy as np
 import gymnasium as gym
@@ -74,6 +75,7 @@ async def start(observation_vector_size_class: ObservationVectorSize, background
 
 def exit_app():
     print("Killing process.")
+    time.sleep(0.5)
     os.kill(os.getpid(), signal.SIGINT)
 
 if __name__ == '__main__':
