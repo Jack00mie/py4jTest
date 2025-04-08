@@ -12,7 +12,7 @@ class TestPy4JEnv(gym.Env):
         self.gateway = JavaGateway()
         self.java_environment = self.gateway.entry_point.getEnvironment(self.observation_vector_size)
 
-        self.observation_space = gym.spaces.MultiDiscrete(np.full(observation_vector_size, 100))
+        self.observation_space = gym.spaces.MultiDiscrete(np.full(observation_vector_size, 3))
         self.action_space = gym.spaces.Discrete(4)
 
     def reset(self, *, seed: int | None = None, options = None,):

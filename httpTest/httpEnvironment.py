@@ -35,7 +35,7 @@ class TestHttpEnv(gym.Env):
     def __init__(self, observation_vector_size: int):
         self.observation_vector_size = observation_vector_size
 
-        self.observation_space = gym.spaces.MultiDiscrete(np.full(observation_vector_size, 100))
+        self.observation_space = gym.spaces.MultiDiscrete(np.full(observation_vector_size, 3))
         self.action_space = gym.spaces.Discrete(4)
 
     def reset(self, *, seed: int | None = None, options = None,):
