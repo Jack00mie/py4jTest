@@ -37,11 +37,13 @@ class TestHttpEnv(gym.Env):
 
         self.observation_space = gym.spaces.MultiDiscrete(np.full(observation_vector_size, 3))
         self.action_space = gym.spaces.Discrete(4)
+        self.session = requests.Session()
+        self.session.headers.update({'Connection': 'keep-alive'})
 
     def reset(self, *, seed: int | None = None, options = None,):
         super().reset(seed=seed)
 
-        response = requests.post(f"http://127.0.0.1:{JAVA_PORT}/reset")
+        response = self.session.post(f"http://127.0.0.1:{JAVA_PORT}/reset")
         response_body = response.json()
 
         observation_vector = np.array(response_body["observationVector"])
@@ -49,7 +51,7 @@ class TestHttpEnv(gym.Env):
         return observation_vector, info
 
     def step(self, action: int):
-        response = requests.post(f"http://127.0.0.1:{JAVA_PORT}/step", json={"action": int(action)})
+        response = self.session.post(f"http://127.0.0.1:{JAVA_PORT}/step", json={"action": int(action)})
         response_body = response.json()
 
         observation_vector = np.array(response_body["observationVector"])
